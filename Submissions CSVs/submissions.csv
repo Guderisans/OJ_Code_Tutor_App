@@ -6,38 +6,3 @@ When,ID,Status,Problem,Time,Memory,Language,Author
 2026-3-6  16:43:03,8c1cd36ecb8a,Runtime Error,2006,18ms,10MB,Python3,wenye
 2026-3-6  16:36:52,88e660823dcf,Runtime Error,2006,18ms,10MB,Python3,wenye
 2026-3-6  16:35:43,1b63eb880518,Runtime Error,2006,18ms,10MB,Python3,wenye
-2026-3-5  15:44:43,c4f648b5a680,Accepted,2005,18ms,10MB,Python3,wenye
-2026-3-5  15:42:49,89bbb27f6fb4,Wrong Answer,2005,18ms,10MB,Python3,wenye
-2026-3-4  22:08:08,6a200adc0923,Accepted,2004,18ms,10MB,Python3,wenye
-2026-3-3  22:44:15,5566000d5190,Accepted,1003,19ms,10MB,Python3,wenye
-2026-3-3  22:35:54,9ed6a3078b5b,Wrong Answer,1003,20ms,10MB,Python3,wenye
-2026-3-3  22:35:47,763227851e49,Wrong Answer,1003,18ms,10MB,Python3,wenye
-2026-3-3  22:32:32,1910ca910385,Wrong Answer,1003,18ms,10MB,Python3,wenye
-2026-3-3  22:29:57,4df26aafe29a,Runtime Error,1003,18ms,10MB,Python3,wenye
-2026-3-2  21:50:46,1bac7fb00321,Accepted,2003,23ms,10MB,Python3,wenye
-2026-3-2  21:41:56,39cebce10c1b,Wrong Answer,2003,23ms,10MB,Python3,wenye
-2026-3-2  21:40:33,b1bdfcecfd45,Runtime Error,2003,8ms,8MB,Python3,wenye
-2026-2-28  09:23:32,475b1b1a16f7,Accepted,2002,14ms,10MB,Python3,wenye
-2026-2-28  09:23:05,75301ba4a8e9,Runtime Error,2002,18ms,10MB,Python3,wenye
-2026-2-27  15:50:58,dac902477f1c,Accepted,1002,17ms,10MB,Python3,wenye
-2026-2-27  15:49:39,7ee73be64755,Wrong Answer,1002,17ms,10MB,Python3,wenye
-2026-2-27  15:49:34,72ab20c6587a,Wrong Answer,1002,17ms,10MB,Python3,wenye
-2026-2-27  15:48:53,635163b4025e,Wrong Answer,1002,17ms,10MB,Python3,wenye
-2026-2-27  15:45:13,216e3c0e2d09,Wrong Answer,1002,18ms,10MB,Python3,wenye
-2026-2-27  15:39:50,366d4a21cb48,Wrong Answer,1002,18ms,10MB,Python3,wenye
-2026-2-27  15:34:42,68c534629698,Wrong Answer,1002,19ms,10MB,Python3,wenye
-2026-2-27  15:31:22,d2f70d39f079,Wrong Answer,1002,18ms,10MB,Python3,wenye
-2026-2-27  15:28:50,2acdd3fc4afb,Wrong Answer,1002,19ms,10MB,Python3,wenye
-2026-2-27  15:25:09,eb39196ba4f9,Wrong Answer,1002,17ms,10MB,Python3,wenye
-2026-2-27  15:24:04,e6ea43ce7741,Wrong Answer,1002,18ms,10MB,Python3,wenye
-2026-2-25  13:43:07,9768adac30d2,Accepted,2001,18ms,10MB,Python3,wenye
-2026-2-25  13:42:49,a6ab2f17fba2,Compile Error,2001,--,--,Python3,wenye
-2026-2-25  13:09:22,8c9e05e27243,Accepted,3001,18ms,10MB,Python3,wenye
-2026-2-25  13:02:25,69f1bc278bd6,Wrong Answer,3001,18ms,10MB,Python3,wenye
-2026-2-25  13:01:11,3226f620f9c0,Wrong Answer,3001,18ms,10MB,Python3,wenye
-2026-2-25  12:59:10,501a9aae90a4,Wrong Answer,3001,15ms,10MB,Python3,wenye
-2026-2-25  12:51:43,be4d81b89abb,Wrong Answer,3001,18ms,10MB,Python3,wenye
-2026-2-25  12:35:45,324e3d3e19de,Accepted,1001,18ms,10MB,Python3,wenye
-2026-2-25  12:34:43,62f17dbd3789,Wrong Answer,1001,18ms,10MB,Python3,wenye
-2026-2-25  12:34:37,5dac24e47fb6,Wrong Answer,1001,18ms,10MB,Python3,wenye
-2026-2-25  12:32:11,db7ab5d9ee34,Wrong Answer,1001,19ms,10MB,Python3,wenye

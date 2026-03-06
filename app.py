@@ -2,15 +2,27 @@ from flask import Flask, render_template, request, jsonify
 import subprocess
 import os
 import sys
+# 新增：导入自动打开浏览器的模块
+import webbrowser
+import threading
+import time
 
 app = Flask(__name__)
 
 # 配置：原脚本的路径（确保和app.py同目录）
 SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "oj_download_submissions.py")
-# 基础URL模板（核心修正：更新带problemID的提交页URL规则）
+# 基础URL模板（匹配正确的OJ URL规则）
 BASE_URL = "https://onlinejudge.hkust-gz.edu.cn/contest/{contest_id}"
 SUBMISSIONS_ALL = "{base_url}/submissions"  # 无题目ID，获取整个竞赛提交
 SUBMISSIONS_PROBLEM = "{base_url}/submissions?problemID={problem_id}"  # 有题目ID，带参数过滤
+
+
+# 新增：自动打开浏览器的函数（延迟执行，等Flask服务启动）
+def open_browser():
+    # 延迟1秒（确保Flask服务已启动，避免页面加载失败）
+    time.sleep(1)
+    # 打开目标页面（和Flask启动的端口一致）
+    webbrowser.open("http://127.0.0.1:5000", new=2)  # new=2：打开新标签页（若无则开新窗口）
 
 
 @app.route('/')
@@ -54,7 +66,7 @@ def run_script():
                 'message': '参数校验失败：' + ' | '.join(required_errors)
             })
 
-        # 3. 自动拼接URL（核心修正：按新规则拼接）
+        # 3. 自动拼接URL（按正确规则拼接）
         base_url = BASE_URL.format(contest_id=contest_id)
         if problem_id.strip():
             # 校验problem_id是否为数字（如果填写了）
@@ -124,5 +136,7 @@ def run_script():
 
 
 if __name__ == '__main__':
+    # 新增：启动线程自动打开浏览器（非阻塞）
+    threading.Thread(target=open_browser, daemon=True).start()
     # 启动Web服务（本地访问：http://127.0.0.1:5000）
     app.run(debug=True, host='0.0.0.0', port=5000)
