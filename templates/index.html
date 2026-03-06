@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>OJ提交记录下载工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="password"], input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .output {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .required {
+            color: red;
+        }
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+    <h1>OJ提交记录下载工具</h1>
+    <form id="ojForm">
+        <!-- 必填项 -->
+        <div class="form-group">
+            <label>OJ用户名 <span class="required">*</span></label>
+            <input type="text" name="username" required placeholder="输入你的OJ登录账号">
+        </div>
+        <div class="form-group">
+            <label>OJ密码 <span class="required">*</span></label>
+            <input type="password" name="password" required placeholder="输入你的OJ登录密码">
+        </div>
+        <div class="form-group">
+            <label>竞赛密码 <span class="required">*</span></label>
+            <input type="text" name="contest_password" required placeholder="输入竞赛访问密码">
+        </div>
+        <div class="form-group">
+            <label>竞赛ID（contest_id）<span class="required">*</span></label>
+            <input type="number" name="contest_id" required placeholder="示例：65（会自动拼接为https://onlinejudge.hkust-gz.edu.cn/contest/65）">
+        </div>
+        <div class="form-group">
+            <label>题目ID（problem_id）</label>
+            <input type="number" name="problem_id" placeholder="示例：2006（留空则获取整个竞赛的提交记录）">
+            <div class="hint">
+                ✨ 提示：<br>
+                - 填写题目ID（如2001）→ 提交页URL：https://onlinejudge.hkust-gz.edu.cn/contest/65/submissions?problemID=2006<br>
+                - 留空 → 提交页URL：https://onlinejudge.hkust-gz.edu.cn/contest/65/submissions（获取整个竞赛的提交记录）
+            </div>
+        </div>
+
+        <!-- 可选项 -->
+        <div class="form-group">
+            <label>过滤年份（留空则全部）</label>
+            <input type="number" name="year" placeholder="示例：2026">
+        </div>
+        <div class="form-group">
+            <label>输出文件名</label>
+            <input type="text" name="output" value="submissions.csv" placeholder="示例：my_submissions.csv">
+        </div>
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="headless"> 无头模式运行（不显示浏览器窗口）
+            </label>
+        </div>
+
+        <button type="submit">开始下载</button>
+    </form>
+
+    <!-- 结果展示区域 -->
+    <div id="result" class="result">
+        <h3 id="resultTitle"></h3>
+        <div id="resultContent" class="output"></div>
+    </div>
+
+    <script>
+        // 表单提交逻辑
+        document.getElementById('ojForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // 阻止默认表单提交
+
+            // 隐藏之前的结果
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
+
+            // 获取表单数据
+            const formData = new FormData(this);
+
+            try {
+                // 提交到后端
+                const response = await fetch('/run-script', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                // 展示结果
+                resultDiv.style.display = 'block';
+                const resultTitle = document.getElementById('resultTitle');
+                const resultContent = document.getElementById('resultContent');
+
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultTitle.textContent = '运行成功！';
+                    resultContent.textContent = data.message + '\n\n脚本输出：\n' + (data.output || '无额外输出');
+                } else {
+                    resultDiv.className = 'result error';
+                    resultTitle.textContent = '运行失败！';
+                    // 拼接错误信息和标准输出
+                    let errorText = data.message;
+                    if (data.error) {
+                        errorText += '\n\n错误信息：\n' + data.error;
+                    }
+                    if (data.stdout) {
+                        errorText += '\n\n脚本输出：\n' + data.stdout;
+                    }
+                    resultContent.textContent = errorText;
+                }
+            } catch (err) {
+                // 网络错误
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                document.getElementById('resultTitle').textContent = '请求失败！';
+                document.getElementById('resultContent').textContent = `错误：${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
