@@ -2,39 +2,46 @@ from flask import Flask, render_template, request, jsonify
 import subprocess
 import os
 import sys
-# 新增：导入自动打开浏览器的模块
 import webbrowser
 import threading
 import time
 
 app = Flask(__name__)
 
-# 配置：原脚本的路径（确保和app.py同目录）
+# 配置：原脚本的路径
 SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "oj_download_submissions.py")
-# 基础URL模板（匹配正确的OJ URL规则）
+# URL模板
 BASE_URL = "https://onlinejudge.hkust-gz.edu.cn/contest/{contest_id}"
-SUBMISSIONS_ALL = "{base_url}/submissions"  # 无题目ID，获取整个竞赛提交
-SUBMISSIONS_PROBLEM = "{base_url}/submissions?problemID={problem_id}"  # 有题目ID，带参数过滤
+SUBMISSIONS_ALL = "{base_url}/submissions"
+SUBMISSIONS_PROBLEM = "{base_url}/submissions?problemID={problem_id}"
+
+# 新增：全局标志位，确保只打开一次浏览器
+browser_opened = False
 
 
-# 新增：自动打开浏览器的函数（延迟执行，等Flask服务启动）
+# 自动打开浏览器函数（加锁，仅执行一次）
 def open_browser():
-    # 延迟1秒（确保Flask服务已启动，避免页面加载失败）
+    global browser_opened
+    # 避免多进程/多线程重复执行
+    if browser_opened:
+        return
+    # 延迟1秒，等Flask服务完全启动
     time.sleep(1)
-    # 打开目标页面（和Flask启动的端口一致）
-    webbrowser.open("http://127.0.0.1:5000", new=2)  # new=2：打开新标签页（若无则开新窗口）
+    # 打开页面（new=1：只打开一个窗口/标签页，不重复创建）
+    webbrowser.open("http://127.0.0.1:5000", new=1)
+    # 标记为已打开
+    browser_opened = True
 
 
 @app.route('/')
 def index():
-    # 渲染前端表单页面
     return render_template('index.html')
 
 
 @app.route('/run-script', methods=['POST'])
 def run_script():
     try:
-        # 1. 获取前端提交的表单数据
+        # 1. 获取表单数据
         data = request.form
         username = data.get('username', '').strip()
         password = data.get('password', '').strip()
@@ -56,7 +63,6 @@ def run_script():
         if not contest_id:
             required_errors.append("竞赛ID不能为空")
         else:
-            # 校验contest_id是否为数字
             if not contest_id.isdigit():
                 required_errors.append("竞赛ID必须是数字（如65）")
 
@@ -66,10 +72,9 @@ def run_script():
                 'message': '参数校验失败：' + ' | '.join(required_errors)
             })
 
-        # 3. 自动拼接URL（按正确规则拼接）
+        # 3. 拼接URL
         base_url = BASE_URL.format(contest_id=contest_id)
         if problem_id.strip():
-            # 校验problem_id是否为数字（如果填写了）
             if not problem_id.isdigit():
                 return jsonify({
                     'status': 'error',
@@ -78,11 +83,11 @@ def run_script():
             submissions_url = SUBMISSIONS_PROBLEM.format(base_url=base_url, problem_id=problem_id)
         else:
             submissions_url = SUBMISSIONS_ALL.format(base_url=base_url)
-        contest_url = base_url  # 竞赛主URL保持不变
+        contest_url = base_url
 
-        # 4. 构造执行脚本的命令行参数
+        # 4. 构造执行命令
         cmd = [
-            sys.executable,  # 当前Python解释器路径（避免环境问题）
+            sys.executable,
             SCRIPT_PATH,
             '--username', username,
             '--password', password,
@@ -91,31 +96,28 @@ def run_script():
             '--submissions-url', submissions_url,
             '--output', output
         ]
-        # 可选参数：年份、是否无头模式
         if year:
             cmd.extend(['--year', year])
         if headless:
             cmd.append('--headless')
 
-        # 5. 执行脚本，捕获输出和错误
+        # 5. 执行脚本
         result = subprocess.run(
             cmd,
-            capture_output=True,  # 捕获stdout/stderr
-            text=True,  # 输出为字符串（而非字节）
-            encoding='utf-8',  # 编码
-            timeout=300  # 超时时间（5分钟，避免脚本卡死）
+            capture_output=True,
+            text=True,
+            encoding='utf-8',
+            timeout=300
         )
 
-        # 6. 处理执行结果
+        # 6. 返回结果
         if result.returncode == 0:
-            # 执行成功：展示拼接后的正确URL
             return jsonify({
                 'status': 'success',
                 'message': f'脚本运行成功！已保存 {output} 文件\n拼接的URL：\n竞赛主URL：{contest_url}\n提交页URL：{submissions_url}',
                 'output': result.stdout
             })
         else:
-            # 执行失败：展示拼接后的URL方便核对
             return jsonify({
                 'status': 'error',
                 'message': f'脚本运行失败！\n拼接的URL（请核对）：\n竞赛主URL：{contest_url}\n提交页URL：{submissions_url}',
@@ -136,7 +138,8 @@ def run_script():
 
 
 if __name__ == '__main__':
-    # 新增：启动线程自动打开浏览器（非阻塞）
+    # 1. 启动线程打开浏览器（仅一次）
     threading.Thread(target=open_browser, daemon=True).start()
-    # 启动Web服务（本地访问：http://127.0.0.1:5000）
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # 2. 关闭debug模式（核心：避免多进程导致重复打开）
+    # host=0.0.0.0：允许局域网访问，若仅本地用可改为127.0.0.1
+    app.run(debug=False, host='127.0.0.1', port=5000)
